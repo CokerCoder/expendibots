@@ -1,9 +1,23 @@
-from NeCho.board import Board, Spot
+from NeCho.helper import *
+
+
+class Spot:
+    def __init__(self, colour, n):
+        self.colour = colour
+        self.n = n
+        self.targets = []
 
 
 class ExamplePlayer:
     def __init__(self, colour):
-        self.board = Board(colour)
+        self.colour = colour
+        self.board = \
+            [[Spot("black", 1) if ((y == 6 or y == 7) and (x != 2 and x != 5))
+              else Spot("white", 1) if ((y == 0 or y == 1) and (x != 2 and x != 5))
+            else None for y in range(8)] for x in range(8)]
+
+        self.black = [(0, 7), (1, 7), (3, 7), (4, 7), (6, 7), (7, 7), (0, 6), (1, 6), (3, 6), (4, 6), (6, 6), (7, 6)]
+        self.white = [(0, 1), (1, 1), (3, 1), (4, 1), (6, 1), (7, 1), (0, 0), (1, 0), (3, 0), (4, 0), (6, 0), (7, 0)]
 
     def action(self):
         """
@@ -15,8 +29,7 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-
-        return ("BOOM", (0, 0))
+        return "BOOM", getattr(self, self.colour)[0]
 
     def update(self, colour, action):
         """
@@ -37,3 +50,6 @@ class ExamplePlayer:
         against the game rules).
         """
         # TODO: Update state representation in response to action.
+
+        if action[0] == 'BOOM':
+            boom(self.board, action[1], self.black, self.white)
