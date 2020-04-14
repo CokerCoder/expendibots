@@ -1,18 +1,9 @@
+from NeCho.board import Board, Spot
+
 
 class ExamplePlayer:
     def __init__(self, colour):
-        """
-        This method is called once at the beginning of the game to initialise
-        your player. You should use this opportunity to set up your own internal
-        representation of the game state, and any other information about the 
-        game state you would like to maintain for the duration of the game.
-
-        The parameter colour will be a string representing the player your 
-        program will play as (White or Black). The value will be one of the 
-        strings "white" or "black" correspondingly.
-        """
-        # TODO: Set up state representation.
-
+        self.board = Board(colour)
 
     def action(self):
         """
@@ -24,8 +15,8 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-        return ("BOOM", (0, 0))
 
+        return ("BOOM", (0, 0))
 
     def update(self, colour, action):
         """
