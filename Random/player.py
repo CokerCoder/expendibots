@@ -1,4 +1,5 @@
-from NeCho.helper import *
+from Random.helper import *
+from random import randrange
 
 
 class ExamplePlayer:
@@ -16,7 +17,7 @@ class ExamplePlayer:
 
         possible_actions = available_actions(self.board, self.colour, getattr(self, self.colour))
         print("possible moves: ", possible_actions)
-        return possible_actions[1]
+        return possible_actions[randrange(0, len(possible_actions))]
 
     def update(self, colour, action):
 
