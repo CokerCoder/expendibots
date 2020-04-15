@@ -1,7 +1,20 @@
-class Spot:
+class Piece:
     def __init__(self, colour, n):
         self.colour = colour
         self.n = n
+
+
+class Board:
+    def __int__(self):
+        pass
+
+    board = \
+        [[Piece("black", 1) if ((y == 6 or y == 7) and (x != 2 and x != 5))
+          else Piece("white", 1) if ((y == 0 or y == 1) and (x != 2 and x != 5))
+        else None for y in range(8)] for x in range(8)]
+
+    black = [(0, 7), (1, 7), (3, 7), (4, 7), (6, 7), (7, 7), (0, 6), (1, 6), (3, 6), (4, 6), (6, 6), (7, 6)]
+    white = [(0, 1), (1, 1), (3, 1), (4, 1), (6, 1), (7, 1), (0, 0), (1, 0), (3, 0), (4, 0), (6, 0), (7, 0)]
 
 
 # Check if the location is available
@@ -57,7 +70,7 @@ def move(board, n, old_pos, new_pos, colour, pieces):
     if board[new_x][new_y] is not None:
         board[new_x][new_y].n += n
     elif board[new_x][new_y] is None:
-        board[new_x][new_y] = Spot(colour, n)
+        board[new_x][new_y] = Piece(colour, n)
 
     if new_pos not in pieces:
         pieces.append(new_pos)
@@ -76,3 +89,25 @@ def available_actions(board, colour, pieces):
                         ((board[new_x][new_y] is None) or board[new_x][new_y].colour == colour):
                     actions.append(("MOVE", d, (x, y), (new_x, new_y)))
     return actions
+
+
+# Calculate current board point for a given player
+# Ver 1.0
+def calc_points(board, colour):
+    points = 0
+
+    # A stack of pieces worth much more than a single piece
+    # In general, a stack of N pieces worth 4^N points than a single piece which worth only 4
+    # The total points is the sum of the current player's pieces points minus the one of the opponent
+
+    for row in range(8):
+        for col in range(8):
+            if board[row][col] is None:
+                continue
+            stack = board[row][col].n
+            if board[row][col].colour == colour:
+                points += 4 ** stack
+            else:
+                points -= 4 ** stack
+
+    return points
