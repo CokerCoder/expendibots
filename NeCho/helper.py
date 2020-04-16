@@ -1,20 +1,25 @@
 class Piece:
     def __init__(self, colour, n):
+
         self.colour = colour
         self.n = n
 
 
 class Board:
-    def __int__(self):
-        pass
+    def __init__(self, board, black, white):
 
-    board = \
-        [[Piece("black", 1) if ((y == 6 or y == 7) and (x != 2 and x != 5))
-          else Piece("white", 1) if ((y == 0 or y == 1) and (x != 2 and x != 5))
-        else None for y in range(8)] for x in range(8)]
+        self.board = board
+        self.black = black
+        self.white = white
 
-    black = [(0, 7), (1, 7), (3, 7), (4, 7), (6, 7), (7, 7), (0, 6), (1, 6), (3, 6), (4, 6), (6, 6), (7, 6)]
-    white = [(0, 1), (1, 1), (3, 1), (4, 1), (6, 1), (7, 1), (0, 0), (1, 0), (3, 0), (4, 0), (6, 0), (7, 0)]
+
+INITIAL_BOARD = \
+    [[Piece("black", 1) if ((y == 6 or y == 7) and (x != 2 and x != 5))
+      else Piece("white", 1) if ((y == 0 or y == 1) and (x != 2 and x != 5))
+    else None for y in range(8)] for x in range(8)]
+
+INITIAL_BLACK = [(0, 7), (1, 7), (3, 7), (4, 7), (6, 7), (7, 7), (0, 6), (1, 6), (3, 6), (4, 6), (6, 6), (7, 6)]
+INITIAL_WHITE = [(0, 1), (1, 1), (3, 1), (4, 1), (6, 1), (7, 1), (0, 0), (1, 0), (3, 0), (4, 0), (6, 0), (7, 0)]
 
 
 # Check if the location is available
@@ -24,7 +29,7 @@ def check_availability(pos):
     return True
 
 
-def explosion_range(board, pos):
+def explosion_range(pos):
     exp_range = []
     for row in range(3):
         for col in range(3):
@@ -38,14 +43,14 @@ def explosion_range(board, pos):
 def boom(board, pos, black, white):
     if board[pos[0]][pos[1]] is None:
         return
-    remove_token(board, pos, black, white)
-    affected = explosion_range(board, pos)
+    remove_piece(board, pos, black, white)
+    affected = explosion_range(pos)
     for affected_piece in affected:
         boom(board, affected_piece, black, white)
 
 
 # Helper function to remove the affected pieces from the board and the black and white lists respectively
-def remove_token(board, pos, black, white):
+def remove_piece(board, pos, black, white):
     colour = board[pos[0]][pos[1]].colour
     if colour == 'black':
         black.remove((pos[0], pos[1]))
@@ -91,9 +96,9 @@ def available_actions(board, colour, pieces):
     return actions
 
 
-# Calculate current board point for a given player
+# Evaluate function to calculate current board state for a player
 # Ver 1.0
-def calc_points(board, colour):
+def evaluate(board, colour):
     points = 0
 
     # A stack of pieces worth much more than a single piece

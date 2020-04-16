@@ -6,7 +6,7 @@ from NeCho.helper import *
 class ExamplePlayer:
     def __init__(self, colour):
         self.colour = colour
-        self.board = Board()
+        self.board = Board(INITIAL_BOARD, INITIAL_BLACK, INITIAL_WHITE)
 
     def action(self):
 
@@ -19,10 +19,11 @@ class ExamplePlayer:
         max_point = 0
         max_action = None
         for possible_action in possible_actions:
-            candidate_board = Board()
-            candidate_board.board = deepcopy(self.board.board)
-            candidate_board.black = deepcopy(self.board.black)
-            candidate_board.white = deepcopy(self.board.white)
+
+            # In the case using a 2D array, deepcopy must be used since a 2D array contains objects and we want the
+            # value not by its reference pointer so that we can modify without affecting the original one
+            # but this method is slow...
+            candidate_board = deepcopy(self.board)
 
             if possible_action[0] == 'BOOM':
                 boom(candidate_board.board, possible_action[1], candidate_board.black, candidate_board.white)
@@ -31,7 +32,7 @@ class ExamplePlayer:
                      getattr(candidate_board, self.colour))
 
             # calculate
-            point = calc_points(candidate_board.board, self.colour)
+            point = evaluate(candidate_board.board, self.colour)
             if point > max_point:
                 max_point = point
                 max_action = possible_action
