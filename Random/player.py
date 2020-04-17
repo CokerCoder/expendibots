@@ -16,7 +16,6 @@ class ExamplePlayer:
     def action(self):
 
         possible_actions = available_actions(self.board, self.colour, getattr(self, self.colour))
-        print("possible moves: ", possible_actions)
         return possible_actions[randrange(0, len(possible_actions))]
 
     def update(self, colour, action):

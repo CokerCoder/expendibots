@@ -1,25 +1,16 @@
+import math
+
+
 class Piece:
     def __init__(self, colour, n):
-
         self.colour = colour
         self.n = n
 
 
-class Board:
-    def __init__(self, board, black, white):
-
-        self.board = board
-        self.black = black
-        self.white = white
-
-
-INITIAL_BOARD = \
-    [[Piece("black", 1) if ((y == 6 or y == 7) and (x != 2 and x != 5))
-      else Piece("white", 1) if ((y == 0 or y == 1) and (x != 2 and x != 5))
-    else None for y in range(8)] for x in range(8)]
-
-INITIAL_BLACK = [(0, 7), (1, 7), (3, 7), (4, 7), (6, 7), (7, 7), (0, 6), (1, 6), (3, 6), (4, 6), (6, 6), (7, 6)]
-INITIAL_WHITE = [(0, 1), (1, 1), (3, 1), (4, 1), (6, 1), (7, 1), (0, 0), (1, 0), (3, 0), (4, 0), (6, 0), (7, 0)]
+# Calculate the euclidean distance between 2 tokens, given as (x, y) format.
+def euclidean(pos1, pos2):
+    distance = math.sqrt((pos1[-2] - pos2[-2]) ** 2 + (pos1[-1] - pos2[-1]) ** 2)
+    return distance
 
 
 # Check if the location is available
@@ -97,14 +88,14 @@ def available_actions(board, colour, pieces):
 
 
 # Evaluate function to calculate current board state for a player
-# Ver 1.0
-def evaluate(board, colour):
+# Ver 1.1
+def evaluate(board, colour, black, white):
+    # points for black, return -points for white player
     points = 0
 
     # A stack of pieces worth much more than a single piece
     # In general, a stack of N pieces worth 4^N points than a single piece which worth only 4
     # The total points is the sum of the current player's pieces points minus the one of the opponent
-
     for row in range(8):
         for col in range(8):
             if board[row][col] is None:
@@ -115,4 +106,12 @@ def evaluate(board, colour):
             else:
                 points -= 4 ** stack
 
+    # Consider the distance, calculate the total average distance between each black and white
+    # Aggressive, minimize the distance
+    dis = []
+    for black_piece in black:
+        for white_piece in white:
+            dis.append(euclidean(black_piece, white_piece))
+    if len(dis) > 0:
+        points -= 10 * (sum(dis) / len(dis))
     return points
