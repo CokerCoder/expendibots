@@ -1,7 +1,7 @@
 import math
+from copy import deepcopy
 
 
-# Calculate the euclidean distance between 2 tokens, given as (x, y) format.
 def euclidean(pos1, pos2):
     distance = math.sqrt((pos1[-2] - pos2[-2]) ** 2 + (pos1[-1] - pos2[-1]) ** 2)
     return distance
@@ -69,9 +69,9 @@ def available_actions(state, colour):
             possible_moves = [(x + d, y), (x, y + d), (x - d, y), (x, y - d)]
             for (new_x, new_y) in possible_moves:
                 if check_availability((new_x, new_y)) and (
-                    False if (colour == "black" and (new_x, new_y) in white)
-                    else False if (colour == "white" and (new_x, new_y) in black)
-                    else True
+                        False if (colour == "black" and (new_x, new_y) in white)
+                        else False if (colour == "white" and (new_x, new_y) in black)
+                        else True
                 ):
                     actions.append(("MOVE", d, (x, y), (new_x, new_y)))
     return actions
@@ -83,3 +83,18 @@ def evaluate(state, colour):
     points = len(state["black"]) - len(state["white"])
     # Simply return the difference of their number of tokens
     return points if colour == "black" else -points
+
+
+def is_over(state):
+    return True if not state["black"] else True if not state["white"] else False
+
+
+def new_state(state, colour, action):
+    candidate_state = deepcopy(state)
+
+    if action[0] == 'BOOM':
+        boom(candidate_state, action[1])
+    elif action[0] == 'MOVE':
+        move(candidate_state, action[1], action[2], action[3], colour)
+
+    return candidate_state

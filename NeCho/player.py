@@ -1,6 +1,5 @@
-from copy import deepcopy
-
 from NeCho.helper import *
+from NeCho.agent import MinimaxAgent
 
 
 class ExamplePlayer:
@@ -25,26 +24,32 @@ class ExamplePlayer:
         #
 
         # # Action Ver 1: Greedy method
-        max_point = -9999
-        max_action = None
-        for possible_action in possible_actions:
+        # max_point = -9999
+        # max_action = None
+        # for possible_action in possible_actions:
+        #
+        #     # In the case using a 2D array, deepcopy must be used since a 2D array contains objects and we want the
+        #     # value not by its reference pointer so that we can modify without affecting the original one
+        #     candidate_board = deepcopy(self.state)
+        #
+        #     if possible_action[0] == 'BOOM':
+        #         boom(candidate_board, possible_action[1])
+        #     elif possible_action[0] == 'MOVE':
+        #         move(candidate_board, possible_action[1], possible_action[2], possible_action[3], self.colour)
+        #
+        #     # calculate
+        #     point = evaluate(candidate_board, self.colour)
+        #     if point > max_point:
+        #         max_point = point
+        #         max_action = possible_action
+        #
+        # return max_action
 
-            # In the case using a 2D array, deepcopy must be used since a 2D array contains objects and we want the
-            # value not by its reference pointer so that we can modify without affecting the original one
-            candidate_board = deepcopy(self.state)
+        # # Action Ver 2: Minimax
+        minimax_agent = MinimaxAgent(2, self.colour)
+        return minimax_agent.choose_action(self.state)
 
-            if possible_action[0] == 'BOOM':
-                boom(candidate_board, possible_action[1])
-            elif possible_action[0] == 'MOVE':
-                move(candidate_board, possible_action[1], possible_action[2], possible_action[3], self.colour)
 
-            # calculate
-            point = evaluate(candidate_board, self.colour)
-            if point > max_point:
-                max_point = point
-                max_action = possible_action
-
-        return max_action
 
     def update(self, colour, action):
         if action[0] == 'BOOM':
