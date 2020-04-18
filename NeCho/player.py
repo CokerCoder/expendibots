@@ -15,9 +15,6 @@ class ExamplePlayer:
         }
 
     def action(self):
-
-        possible_actions = available_actions(self.state, self.colour)
-
         #
         # # Action Ver 0: Choose random move
         # # return possible_actions[randrange(0, len(possible_actions))]
@@ -46,13 +43,25 @@ class ExamplePlayer:
         # return max_action
 
         # # Action Ver 2: Minimax
-        minimax_agent = MinimaxAgent(2, self.colour)
+        # Choose appropriate depth based on the number of pieces left on the board
+        num_pieces = sum([int(x[0]) for x in self.state["black"]]) + sum([int(y[0]) for y in self.state["white"]])
+
+        if num_pieces > 10:
+            minimax_agent = MinimaxAgent(2, self.colour)
+        elif 8 <= num_pieces <= 10:
+            minimax_agent = MinimaxAgent(3, self.colour)
+        elif 5 <= num_pieces <= 7:
+            minimax_agent = MinimaxAgent(4, self.colour)
+        elif 2 <= num_pieces <= 4:
+            minimax_agent = MinimaxAgent(5, self.colour)
+        else:
+            minimax_agent = MinimaxAgent(1, self.colour)
+
         return minimax_agent.choose_action(self.state)
-
-
 
     def update(self, colour, action):
         if action[0] == 'BOOM':
             boom(self.state, action[1])
         elif action[0] == 'MOVE':
             move(self.state, action[1], action[2], action[3], colour)
+        print("current black has {} systems and white has {} systems".format(compute_system(self.state, "black"), compute_system(self.state, "white")))

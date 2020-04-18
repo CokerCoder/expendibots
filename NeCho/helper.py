@@ -24,6 +24,33 @@ def explosion_range(pos):
     return exp_range
 
 
+# Computer the number of systems of a given color that the current state has
+def compute_system(state, colour):
+    systems = []
+    prev = []
+    for piece in [tuple(p[1:]) for p in state[colour]]:
+        curr_system = compute_system1(state, colour, [], prev, piece)
+        if curr_system:
+            systems.append(curr_system)
+    return len(systems)
+
+
+# helper function to recursively compute the systems
+def compute_system1(state, colour, curr_system, prev, coord):
+    if coord in prev:
+        return []
+    curr_system.append(coord)
+    prev.append(coord)
+
+    for exp in explosion_range(coord):
+        if exp not in [tuple(p[1:]) for p in state[colour]]:
+            continue
+        if exp in prev:
+            continue
+        compute_system1(state, colour, curr_system, prev, exp)
+    return curr_system
+
+
 # Explosion function, will affect the surrounding pieces and recursively explode
 def boom(state, pos):
     black = [tuple(b[1:]) for b in state["black"]]
