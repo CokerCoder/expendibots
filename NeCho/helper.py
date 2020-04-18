@@ -107,9 +107,14 @@ def available_actions(state, colour):
 # Evaluate function to calculate current board state for a player
 # Ver 1.1.1
 def evaluate(state, colour):
-    points = len(state["black"]) - len(state["white"])
+    if colour == "black":
+        enemy = "white"
+    else:
+        enemy = "black"
+
+    points = len(state[colour]) - len(state[enemy])
     # Simply return the difference of their number of tokens
-    return points if colour == "black" else -points
+    return points
 
 
 def is_over(state):

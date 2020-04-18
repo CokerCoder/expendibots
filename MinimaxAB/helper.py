@@ -1,6 +1,6 @@
 import math
 from copy import deepcopy
-
+import numpy as np
 
 def euclidean(pos1, pos2):
     distance = math.sqrt((pos1[-2] - pos2[-2]) ** 2 + (pos1[-1] - pos2[-1]) ** 2)
@@ -104,12 +104,56 @@ def available_actions(state, colour):
     return actions
 
 
+def find_token_num(state,colour):
+    num = 0
+    for token in state[colour]:
+        num += token[0]
+    return num
+
+def point_in_stack(state,colour):
+    num = 0
+    for token in state[colour]:
+        if token[0] != 0:
+            num += 0.7**(token[0])
+    return num
+
+
 # Evaluate function to calculate current board state for a player
 # Ver 1.1.1
 def evaluate(state, colour):
-    points = len(state["black"]) - len(state["white"])
-    # Simply return the difference of their number of tokens
-    return points if colour == "black" else -points
+    if colour == "black":
+        enemy = "white"
+    else:
+        enemy = "black"
+
+
+    if len(state[colour]) == 0:
+        return -10
+    elif len(state[enemy]) == 0:
+        return 10
+    elif len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
+        return 0
+    else:
+        enemy_sys = compute_system(state,enemy)
+        colour_sys = compute_system(state,colour)
+        if len(state[colour]) > enemy_sys:
+            colour_enough = 1
+        else:
+            colour_enough = 0
+
+        if len(state[enemy]) > colour_sys:
+            enemy_enough = 1
+        else:
+            enemy_enough = 0
+
+
+        points = 1.5*colour_enough-1.5*enemy_enough+\
+                 colour_sys-enemy_sys+\
+                 find_token_num(state,colour)-find_token_num(state,enemy)+\
+                 point_in_stack(state,colour)-point_in_stack(state,enemy)
+
+        # Simply return the difference of their number of tokens
+        return points
 
 
 def is_over(state):
