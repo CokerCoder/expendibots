@@ -1,5 +1,5 @@
-from NeCho.helper import *
-from NeCho.agent import MinimaxAgent, MinimaxABAgent
+from MinimaxAB.helper import *
+from MinimaxAB.agent import MinimaxABAgent
 
 
 class ExamplePlayer:
