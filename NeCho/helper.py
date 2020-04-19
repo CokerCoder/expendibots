@@ -1,5 +1,6 @@
 import math
 from copy import deepcopy
+import numpy as np
 
 
 def euclidean(pos1, pos2):
@@ -104,16 +105,56 @@ def available_actions(state, colour):
     return actions
 
 
-# Evaluate function to calculate current board state for a player
-# Ver 1.1.1
-def evaluate(state, colour):
-    if colour == "black":
-        enemy = "white"
-    else:
-        enemy = "black"
+def find_token_num(state, colour):
+    return sum([p[0] for p in state[colour]])
 
-    points = len(state[colour]) - len(state[enemy])
-    # Simply return the difference of their number of tokens
+
+def point_in_stack(state, colour):
+    return sum(map(lambda x: 0.7 ** x, [p[0] for p in state[colour]]))
+
+
+# Return a list of integers indicating the respective feature values including
+# 1. Number of black pieces
+# 2. Number of white pieces
+# 3. Number of black systems
+# 4. Number of white systems
+# 5. Number of black stacks
+# 6. Number of white stacks
+# 7. Boolean (1 or 0) if black pieces greater than number of white stacks
+# 8. Boolean (1 or 0) if white pieces greater than number of black stacks
+def feature_set(state):
+    num_b = find_token_num(state, "black")
+    num_w = find_token_num(state, "white")
+    sys_b = compute_system(state, "black")
+    sys_w = compute_system(state, "white")
+    stack_b = sum([p[0] for p in state["black"] if p[0] > 1])
+    stack_w = sum([p[0] for p in state["white"] if p[0] > 1])
+    enough_b = 1 if num_b > sys_w else 0
+    enough_w = 1 if num_w > sys_b else 0
+    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w]
+
+
+# Evaluate function to calculate current board state for a player
+# Ver 1.3
+def evaluate(state, colour):
+    enemy = "white" if colour == "black" else "black"
+
+    if len(state[colour]) == 0:
+        return float('-inf')
+    elif len(state[enemy]) == 0:
+        return float('inf')
+    elif len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
+        return 0
+
+    coeff = {
+        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5],
+        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5]
+    }
+    coeff = np.array(coeff[colour])
+    features = np.array(feature_set(state))
+
+    points = np.dot(features, coeff)
+
     return points
 
 

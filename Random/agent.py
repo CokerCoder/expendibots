@@ -1,4 +1,4 @@
-from NeCho.helper import *
+from Random.helper import *
 
 
 class MinimaxABAgent:

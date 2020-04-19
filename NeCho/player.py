@@ -1,5 +1,5 @@
 from NeCho.helper import *
-from NeCho.agent import MinimaxAgent, MinimaxABAgent
+from NeCho.agent import MinimaxABAgent
 
 
 class ExamplePlayer:
@@ -44,7 +44,7 @@ class ExamplePlayer:
 
         # # Action Ver 2: Minimax
         # Choose appropriate depth based on the number of pieces left on the board
-        num_pieces = sum([int(x[0]) for x in self.state["black"]]) + sum([int(y[0]) for y in self.state["white"]])
+        num_pieces = sum([x[0] for x in self.state["black"]]) + sum([y[0] for y in self.state["white"]])
 
         if num_pieces > 10:
             minimax_agent = MinimaxABAgent(2, self.colour)
@@ -64,4 +64,3 @@ class ExamplePlayer:
             boom(self.state, action[1])
         elif action[0] == 'MOVE':
             move(self.state, action[1], action[2], action[3], colour)
-        print("current black has {} systems and white has {} systems".format(compute_system(self.state, "black"), compute_system(self.state, "white")))
