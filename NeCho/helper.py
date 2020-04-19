@@ -112,6 +112,44 @@ def find_token_num(state, colour):
 def point_in_stack(state, colour):
     return sum(map(lambda x: 0.7 ** x, [p[0] for p in state[colour]]))
 
+def in_danger(state,colour,enemy):
+    boom_colour = 0
+    boom_enemy = 0
+    for i in state[colour]:
+        check_list = [i]
+        while(check_list):
+            for colour_token in state[colour]:
+                if (euclidean(colour_token ,i)) <= np.sqrt(2) and i != colour_token:
+                    check_list.append(colour_token)
+            temp = len(check_list)
+            for check_token in check_list:
+                for my_enemy in state[enemy]:
+                    if (euclidean(check_token, my_enemy)) <= np.sqrt(2):
+                        boom_enemy += my_enemy[0]
+                        state[enemy].remove(my_enemy)
+
+                state[colour].remove(check_token)
+            check_list = []
+
+            if boom_enemy > 0:
+                boom_colour += temp
+
+
+    return [boom_colour,boom_enemy]
+
+def attact(state,colour,enemy):
+    att_num = 0
+    for color_token in state[colour]:
+        for enemy_token in state[enemy]:
+            eucl = euclidean(color_token,enemy_token)
+            if eucl == 2 or eucl == np.sqrt(5):
+                att_num +=1
+    if len(state[colour])!= 0:
+        return att_num / len(state[colour])
+    return 0
+
+
+
 
 # Return a list of integers indicating the respective feature values including
 # 1. Number of black pieces
@@ -122,6 +160,11 @@ def point_in_stack(state, colour):
 # 6. Number of white stacks
 # 7. Boolean (1 or 0) if black pieces greater than number of white stacks
 # 8. Boolean (1 or 0) if white pieces greater than number of black stacks
+# 9. Number of black pieces in danger
+# 10.Number of white pieces in danger
+# 11.Average attack for black
+# 12.Average attack for white
+
 def feature_set(state):
     num_b = find_token_num(state, "black")
     num_w = find_token_num(state, "white")
@@ -131,11 +174,15 @@ def feature_set(state):
     stack_w = sum([p[0] for p in state["white"] if p[0] > 1])
     enough_b = 1 if num_b > sys_w else 0
     enough_w = 1 if num_w > sys_b else 0
-    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w]
+    [b_in_d,w_in_d] = in_danger(state, "black", "white")
+    b_attact = attact(state,"black","white")
+    w_attact = attact(state, "white","black")
+
+    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w, b_in_d, w_in_d, b_attact, w_attact]
 
 
 # Evaluate function to calculate current board state for a player
-# Ver 1.3
+# Ver 1.4
 def evaluate(state, colour):
     enemy = "white" if colour == "black" else "black"
 
@@ -147,8 +194,8 @@ def evaluate(state, colour):
         return 0
 
     coeff = {
-        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5],
-        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5]
+        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, 1, -1, 1.1, -1.1],
+        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, -1, 1, -1.1, 1.1]
     }
     coeff = np.array(coeff[colour])
     features = np.array(feature_set(state))
