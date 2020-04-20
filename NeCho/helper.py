@@ -133,20 +133,20 @@ def in_danger(state,colour,enemy):
 
             if boom_enemy > 0:
                 boom_colour += temp
-
-
     return [boom_colour,boom_enemy]
 
 def attact(state,colour,enemy):
     att_num = 0
     for color_token in state[colour]:
+        temp = 0
         for enemy_token in state[enemy]:
             eucl = euclidean(color_token,enemy_token)
             if eucl == 2 or eucl == np.sqrt(5):
-                att_num +=1
-    if len(state[colour])!= 0:
-        return att_num / len(state[colour])
-    return 0
+                temp +=1
+        if temp > att_num:
+            att_num = temp
+
+    return att_num
 
 
 
@@ -194,8 +194,8 @@ def evaluate(state, colour):
         return 0
 
     coeff = {
-        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, 1, -1, 1.1, -1.1],
-        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, -1, 1, -1.1, 1.1]
+        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, 1, -1, 1, -1],
+        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, -1, 1, -1, 1]
     }
     coeff = np.array(coeff[colour])
     features = np.array(feature_set(state))

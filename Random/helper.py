@@ -151,8 +151,9 @@ def evaluate(state, colour):
     random_coeff = [random.uniform(-2, 2) for i in range(len(features))]
     coeff = {
         "black": random_coeff,
-        "white": map(lambda x: -1 * x, random_coeff)
+        "white": list(map(lambda x: -1 * x, random_coeff))
     }
+
     coeff = np.array(coeff[colour])
 
     points = np.dot(features, coeff)
