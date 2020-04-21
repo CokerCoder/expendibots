@@ -95,14 +95,15 @@ def available_actions(state, colour):
     for [n, x, y] in state[colour]:
         actions.append(("BOOM", (x, y)))
         for d in range(1, n + 1):
-            possible_moves = [(x + d, y), (x, y + d), (x - d, y), (x, y - d)]
-            for (new_x, new_y) in possible_moves:
-                if check_availability((new_x, new_y)) and (
-                        False if (colour == "black" and (new_x, new_y) in white)
-                        else False if (colour == "white" and (new_x, new_y) in black)
-                        else True
-                ):
-                    actions.append(("MOVE", d, (x, y), (new_x, new_y)))
+            for w in range(1, n + 1):
+                possible_moves = [(x + w, y), (x, y + w), (x - w, y), (x, y - w)]
+                for (new_x, new_y) in possible_moves:
+                    if check_availability((new_x, new_y)) and (
+                            False if (colour == "black" and (new_x, new_y) in white)
+                            else False if (colour == "white" and (new_x, new_y) in black)
+                            else True
+                    ):
+                        actions.append(("MOVE", d, (x, y), (new_x, new_y)))
     return actions
 
 
@@ -151,7 +152,7 @@ def evaluate(state, colour):
     random_coeff = [random.uniform(-2, 2) for i in range(len(features))]
     coeff = {
         "black": random_coeff,
-        "white": map(lambda x: -1 * x, random_coeff)
+        "white": list(map(lambda x: -1 * x, random_coeff))
     }
     coeff = np.array(coeff[colour])
 
