@@ -11,6 +11,7 @@ class MinimaxABAgent:
     def choose_action(self, state):
 
         eval_score, selected_action = self._minimax(0, state, self.colour, float('-inf'), float('inf'))
+        print(selected_action)
 
         return selected_action
 

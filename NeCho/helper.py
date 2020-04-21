@@ -195,8 +195,8 @@ def evaluate(state, colour):
         return 0
 
     coeff = {
-        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, 1, -1, 1, -1],
-        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, -1, 1, -1, 1]
+        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, -1, 1, 1, -1],
+        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, 1, -1, -1, 1]
     }
     coeff = np.array(coeff[colour])
     features = np.array(feature_set(state))

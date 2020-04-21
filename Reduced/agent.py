@@ -12,6 +12,7 @@ class MinimaxABAgent:
 
         eval_score, selected_action = self._minimax(0, state, self.colour, float('-inf'), float('inf'))
 
+
         return selected_action
 
     def _minimax(self, current_depth, state, colour, alpha, beta):
@@ -44,5 +45,4 @@ class MinimaxABAgent:
                 beta = min(beta, best_value)
                 if beta <= alpha:
                     break
-
         return best_value, action

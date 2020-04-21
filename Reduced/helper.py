@@ -148,7 +148,14 @@ def attact(state,colour,enemy):
 
     return att_num
 
+def advanced_attack(state,colour,enemy):
+    att= 0
+    for color_token in state[colour]:
+        for enemy_token in state[enemy]:
+            eucl = euclidean(color_token,enemy_token)
+            att+= eucl
 
+    return att
 
 
 # Return a list of integers indicating the respective feature values including
@@ -177,8 +184,10 @@ def feature_set(state):
     [b_in_d,w_in_d] = in_danger(state, "black", "white")
     b_attact = attact(state,"black","white")
     w_attact = attact(state, "white","black")
+    ad_att_b = attact(state,"black","white")
+    ad_att_w = attact(state,"white","black")
 
-    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w, b_in_d, w_in_d, b_attact, w_attact]
+    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w, b_in_d, w_in_d, b_attact, w_attact,ad_att_b,ad_att_w]
 
 
 # Evaluate function to calculate current board state for a player
@@ -193,14 +202,13 @@ def evaluate(state, colour):
     elif len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
         return 0
 
-    return 0
     coeff = {
-        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, 1, -1, 1, -1],
-        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, -1, 1, -1, 1]
+        "black": [1.2, -1.2, 1, -1, 5.0, -0.0, 3.5, -1.5, 2, -1, 1.5, -0.1, -5.5, 0],
+        "white": [-1.2, 1.2, -1, 1, -0.0, 5.0, -3.5, 1.5, -1, 2, -1.5, 0.1, 0, -5.5]
     }
     coeff = np.array(coeff[colour])
     features = np.array(feature_set(state))
-
+    print(coeff)
     points = np.dot(features, coeff)
 
     return points
