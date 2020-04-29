@@ -23,7 +23,7 @@ class MinimaxABAgent:
         possible_actions = available_actions(state, colour)
 
         best_value = float('-inf') if colour == self.colour else float('inf')
-        action = possible_actions[0]
+        action = possible_actions[-1]
 
         for possible_action in possible_actions:
 

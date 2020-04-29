@@ -145,18 +145,19 @@ def feature_set(state):
 def evaluate(state, colour):
     enemy = "white" if colour == "black" else "black"
 
-    if len(state[colour]) == 0:
+    if len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
+        return 0
+    elif len(state[colour]) == 0:
         return float('-inf')
     elif len(state[enemy]) == 0:
         return float('inf')
-    elif len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
-        return 0
+        
 
     features = np.array(feature_set(state))
 
     coeff = {
-        "black": [1.68, -1.68, 1, -1, -0.005, 0.2, -0.2],
-        "white": [-1.68, 1.68, -1, 1, -0.005, -0.2, 0.2]
+        "black": [2, -2, 1, -1, -0.005, 0.2, -0.2],
+        "white": [-2, 2, -1, 1, -0.005, -0.2, 0.2]
     }
 
 
