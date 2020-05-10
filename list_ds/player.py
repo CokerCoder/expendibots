@@ -29,9 +29,9 @@ class ExamplePlayer:
         elif 7 <= num_pieces <= 12:
             minimax_agent = MinimaxABAgent(4, self.colour)
         elif 4 <= num_pieces <= 6:
-            minimax_agent = MinimaxABAgent(7, self.colour)
+            minimax_agent = MinimaxABAgent(5, self.colour)
         elif 1 <= num_pieces <= 3:
-            minimax_agent = MinimaxABAgent(9, self.colour)
+            minimax_agent = MinimaxABAgent(6, self.colour)
         else:
             minimax_agent = MinimaxABAgent(1, self.colour)
 

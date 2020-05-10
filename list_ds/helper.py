@@ -142,9 +142,11 @@ def attack_range(state, colour):
         for affected_token in affected:
             n = state[convert_pos(affected_token)]
             if n*colour > 0:
-                curr_range -= abs(n)
+                # curr_range -= abs(n)
+                pass
             elif n*colour < 0:
                 curr_range += abs(n)
+        curr_range -= val
         if curr_range > max_range:
             max_range = curr_range
                 
@@ -157,7 +159,7 @@ def stack_points(state, colour):
 
 def feature_set(state, colour):
 
-    hp = sum([abs(x) for x in state if x*colour>0])
+    enemy_hp = sum([abs(x) for x in state if x*colour<0])
 
     num_diff = sum(state) * colour
 
@@ -167,9 +169,9 @@ def feature_set(state, colour):
 
     attack_max_range = attack_range(state, colour)
 
-    stack = stack_points(state, colour)
+    stack = stack_points(state, colour) if num_diff < 0 else 0 # stack if in disadvantage
 
-    return [hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
+    return [enemy_hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
 
 
 # Evaluate function to calculate current board state for a player
@@ -190,8 +192,8 @@ def evaluate(state, colour):
 
     features = np.array(feature_set(state, colour))
 
-    # [hp, num_diff, num_systems, minimum_dis, average_dis, attack_max_range, stack]
-    coeff = [0.5, 2, 0.2, -0.2, 0, 0.05, 0.1]
+    # [enemy_hp, num_diff, num_systems, minimum_dis, average_dis, attack_max_range, stack]
+    coeff = [-1, 3, 0, -0.1, 0, 2, 0.2]
 
     _coeff = np.array(coeff)
 
