@@ -161,7 +161,7 @@ def feature_set(state, colour):
 
     num_diff = sum(state) * colour
 
-    num_systems = compute_system(state, colour) 
+    num_systems = compute_system(state, colour)
     
     minimum_dis, avg_dis = distance(state)
 
@@ -190,8 +190,8 @@ def evaluate(state, colour):
 
     features = np.array(feature_set(state, colour))
 
-    # [hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
-    coeff = [0.1, 2, 1, -1, -0.1, 0.1, 0]
+    # [hp, num_diff, num_systems, minimum_dis, average_dis, attack_max_range, stack]
+    coeff = [0.5, 2, 0.2, -0.2, 0, 0.05, 0.1]
 
     _coeff = np.array(coeff)
 
