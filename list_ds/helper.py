@@ -54,6 +54,32 @@ def move(state, n, old_pos, new_pos, colour):
     state[old_index] -= colour * n
 
 
+def compute_system(state, colour):
+    systems = 0
+    prev = []
+    for idx, val in enumerate(state):
+        if val*colour > 0:
+            curr_system = compute_system1(state, colour, [], prev, idx)
+            if curr_system:
+                systems += 1
+    return systems
+
+
+def compute_system1(state, colour, curr_system, prev, index):
+    if index in prev:
+        return []
+    curr_system.append(index)
+    prev.append(index)
+
+    for exp in explosion_range(convert_index(index)):
+        if state[convert_pos(exp)]*colour<=0:
+            continue
+        if exp in prev:
+            continue
+        compute_system1(state, colour, curr_system, prev, convert_pos(exp))
+    return curr_system
+
+
 def available_actions(state, colour):
 
     actions = []
@@ -102,20 +128,48 @@ def distance(state):
     return minimum_dis, avg_distance
 
 
-def attack_range(state):
-    
-    return 0
+def attack_range(state, colour):
+
+    total_range = 0
+    total = 0
+    max_range = 0
+
+    for idx, val in enumerate(state):
+        if val*colour <= 0:
+            continue
+        affected = explosion_range(convert_index(idx))
+        curr_range = 0
+        for affected_token in affected:
+            n = state[convert_pos(affected_token)]
+            if n*colour > 0:
+                curr_range -= abs(n)
+            elif n*colour < 0:
+                curr_range += abs(n)
+        if curr_range > max_range:
+            max_range = curr_range
+                
+    return max_range
+
+
+def stack_points(state, colour):
+    return sum([2**abs(x) for x in state if x*colour>0])
 
 
 def feature_set(state, colour):
 
-    num_diff = sum(state) * colour 
+    hp = sum([abs(x) for x in state if x*colour>0])
+
+    num_diff = sum(state) * colour
+
+    num_systems = compute_system(state, colour) 
     
-    minimum_dis, avg_dis = 0, 0
+    minimum_dis, avg_dis = distance(state)
 
-    attack_diff = 0
+    attack_max_range = attack_range(state, colour)
 
-    return [num_diff, minimum_dis, avg_dis]
+    stack = stack_points(state, colour)
+
+    return [hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
 
 
 # Evaluate function to calculate current board state for a player
@@ -136,7 +190,8 @@ def evaluate(state, colour):
 
     features = np.array(feature_set(state, colour))
 
-    coeff = [1, 0, 0]
+    # [hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
+    coeff = [0.1, 2, 1, -1, -0.1, 0.1, 0]
 
     _coeff = np.array(coeff)
 
@@ -156,6 +211,6 @@ def new_state(state, colour, action):
     if action[0] == 'BOOM':
         boom(candidate_state, action[1])
     elif action[0] == 'MOVE':
-        move(candidate_state, action[1], action[2], action[3], 1 if colour=="black" else -1)
+        move(candidate_state, action[1], action[2], action[3], colour)
 
     return candidate_state
