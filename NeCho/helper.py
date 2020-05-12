@@ -1,6 +1,13 @@
 import math
-from copy import deepcopy
 import numpy as np
+
+
+def convert_pos(pos):
+    return (7-pos[1])*8+pos[0]
+
+
+def convert_index(index):
+    return (index%8, 7-index//8)
 
 
 def euclidean(pos1, pos2):
@@ -8,7 +15,6 @@ def euclidean(pos1, pos2):
     return distance
 
 
-# Check if the location is available
 def check_availability(pos):
     if (pos[0] < 0) or (pos[1] < 0) or (pos[0] > 7) or (pos[1] > 7):
         return False
@@ -25,193 +31,116 @@ def explosion_range(pos):
     return exp_range
 
 
-# Computer the number of systems of a given color that the current state has
-def compute_system(state, colour):
-    systems = []
-    prev = []
-    for piece in [tuple(p[1:]) for p in state[colour]]:
-        curr_system = compute_system1(state, colour, [], prev, piece)
-        if curr_system:
-            systems.append(curr_system)
-    return len(systems)
-
-
-# helper function to recursively compute the systems
-def compute_system1(state, colour, curr_system, prev, coord):
-    if coord in prev:
-        return []
-    curr_system.append(coord)
-    prev.append(coord)
-
-    for exp in explosion_range(coord):
-        if exp not in [tuple(p[1:]) for p in state[colour]]:
-            continue
-        if exp in prev:
-            continue
-        compute_system1(state, colour, curr_system, prev, exp)
-    return curr_system
-
-
-# Explosion function, will affect the surrounding pieces and recursively explode
 def boom(state, pos):
-    black = [tuple(b[1:]) for b in state["black"]]
-    white = [tuple(w[1:]) for w in state["white"]]
-    if pos not in black and pos not in white:
+
+    if state[convert_pos(pos)] == 0:
         return
-    if pos in black:
-        del state["black"][black.index(pos)]
-    else:
-        del state["white"][white.index(pos)]
+    
+    state[convert_pos(pos)] = 0
 
     affected = explosion_range(pos)
     for affected_piece in affected:
         boom(state, affected_piece)
 
 
-# Move n white/black tokens from old_pos to new_pos
 def move(state, n, old_pos, new_pos, colour):
-    pieces = [tuple(p[1:]) for p in state[colour]]
 
     # add n to new position
-    if new_pos in pieces:
-        new_index = pieces.index(new_pos)
-        state[colour][new_index][0] += n
-    elif new_pos not in pieces:
-        state[colour].append([n, new_pos[0], new_pos[1]])
+    new_index = convert_pos(new_pos)
+    state[new_index] += colour * n
 
     # remove n from old position
-    old_index = pieces.index(old_pos)
-    state[colour][old_index][0] -= n
-    if state[colour][old_index][0] == 0:
-        del state[colour][old_index]
+    old_index = convert_pos(old_pos)
+    state[old_index] -= colour * n
 
 
-# Self implement function to list all the possible moves of a given piece
 def available_actions(state, colour):
-    black = [tuple(b[1:]) for b in state["black"]]
-    white = [tuple(w[1:]) for w in state["white"]]
+
     actions = []
-    for [n, x, y] in state[colour]:
+    for idx, val in enumerate(state):
+        
+        if val*colour <= 0:
+            continue
+
+        x, y = convert_index(idx)
         actions.append(("BOOM", (x, y)))
-        for d in range(1, n + 1):
-            for w in range(1, n + 1):
-                possible_moves = [(x + w, y), (x, y + w), (x - w, y), (x, y - w)]
-                for (new_x, new_y) in possible_moves:
-                    if check_availability((new_x, new_y)) and (
-                            False if (colour == "black" and (new_x, new_y) in white)
-                            else False if (colour == "white" and (new_x, new_y) in black)
-                            else True
-                    ):
+        for d in range(1, abs(val) + 1):
+            for w in range(1, abs(val) + 1):
+                adj_cells = [(x + w, y), (x, y + w), (x - w, y), (x, y - w)]
+                for (new_x, new_y) in adj_cells:
+                    if check_availability((new_x, new_y)) and state[convert_pos((new_x, new_y))]*colour >= 0:
                         actions.append(("MOVE", d, (x, y), (new_x, new_y)))
+                        
     return actions
 
 
-def find_token_num(state, colour):
-    return sum([p[0] for p in state[colour]])
+def distance(state):
 
+    black = []
+    white = []
+    for idx, val in enumerate(state):
+        if val > 0:
+            black.append(convert_index(idx))
+        if val < 0:
+            white.append(convert_index(idx))
 
-def point_in_stack(state, colour):
-    return sum(map(lambda x: 0.7 ** x, [p[0] for p in state[colour]]))
+    minimum_dis = float("inf")
 
-def in_danger(state,colour,enemy):
-    boom_colour = 0
-    boom_enemy = 0
-    for i in state[colour]:
-        check_list = [i]
-        while(check_list):
-            for colour_token in state[colour]:
-                if (euclidean(colour_token ,i)) <= np.sqrt(2) and i != colour_token:
-                    check_list.append(colour_token)
-            temp = len(check_list)
-            for check_token in check_list:
-                for my_enemy in state[enemy]:
-                    if (euclidean(check_token, my_enemy)) <= np.sqrt(2):
-                        boom_enemy += my_enemy[0]
-                        state[enemy].remove(my_enemy)
-
-                state[colour].remove(check_token)
-            check_list = []
-
-            if boom_enemy > 0:
-                boom_colour += temp
-    return [boom_colour,boom_enemy]
-
-def attact(state,colour,enemy):
-    att_num = 0
-    for color_token in state[colour]:
-        temp = 0
-        for enemy_token in state[enemy]:
-            eucl = euclidean(color_token,enemy_token)
-            if eucl == 2 or eucl == np.sqrt(5):
-                temp +=1
-        if temp > att_num:
-            att_num = temp
-
-    return att_num
+    for b in black:
+        for w in white:
+            dis = euclidean(b, w)
+            if dis < minimum_dis:
+                minimum_dis = dis
+    
+    return minimum_dis
 
 
 
+def feature_set(state, colour):
 
-# Return a list of integers indicating the respective feature values including
-# 1. Number of black pieces
-# 2. Number of white pieces
-# 3. Number of black systems
-# 4. Number of white systems
-# 5. Number of black stacks
-# 6. Number of white stacks
-# 7. Boolean (1 or 0) if black pieces greater than number of white stacks
-# 8. Boolean (1 or 0) if white pieces greater than number of black stacks
-# 9. Number of black pieces in danger
-# 10.Number of white pieces in danger
-# 11.Average attack for black
-# 12.Average attack for white
+    enemy_hp = sum([abs(x) for x in state if x*colour<0])
 
-def feature_set(state):
-    num_b = find_token_num(state, "black")
-    num_w = find_token_num(state, "white")
-    sys_b = compute_system(state, "black")
-    sys_w = compute_system(state, "white")
-    stack_b = sum([p[0] for p in state["black"] if p[0] > 1])
-    stack_w = sum([p[0] for p in state["white"] if p[0] > 1])
-    enough_b = 1 if num_b > sys_w else 0
-    enough_w = 1 if num_w > sys_b else 0
-    [b_in_d,w_in_d] = in_danger(state, "black", "white")
-    b_attact = attact(state,"black","white")
-    w_attact = attact(state, "white","black")
+    num_diff = sum(state) * colour
 
-    return [num_b, num_w, sys_b, sys_w, stack_b, stack_w, enough_b, enough_w, b_in_d, w_in_d, b_attact, w_attact]
+    minimum_dis = distance(state)
+
+    return [enemy_hp, num_diff, minimum_dis]
 
 
 # Evaluate function to calculate current board state for a player
-# Ver 1.4
+# Ver 2.0
 def evaluate(state, colour):
-    enemy = "white" if colour == "black" else "black"
 
-    if len(state[colour]) == 0:
+    # if lose
+    if (colour==1 and colour*max(state)<=0) or (colour==-1 and colour*min(state)<=0):
         return float('-inf')
-    elif len(state[enemy]) == 0:
+
+    # if win
+    elif (colour==1 and colour*min(state)>=0) or (colour==-1 and colour*max(state)>=0):
         return float('inf')
-    elif len(state[colour]) == len(state[enemy]) and len(state[colour]) == 0:
+
+    # if draw
+    elif len(set(state)) == 0:
         return 0
 
-    coeff = {
-        "black": [1.2, -1.2, 1, -1, 1.2, -1.2, 1.5, -1.5, -1, 1, 1, -1],
-        "white": [-1.2, 1.2, -1, 1, -1.2, 1.2, -1.5, 1.5, 1, -1, -1, 1]
-    }
-    coeff = np.array(coeff[colour])
-    features = np.array(feature_set(state))
+    features = np.array(feature_set(state, colour))
 
-    points = np.dot(features, coeff)
+    coeff = [-800, 2000, -0.01]
 
+    _coeff = np.array(coeff)
+
+    # Using simple linear model
+    points = np.dot(features, _coeff)
+    
     return points
 
 
 def is_over(state):
-    return True if not state["black"] else True if not state["white"] else False
+    return True if (max(state)<=0 or min(state)>=0) else False
 
 
 def new_state(state, colour, action):
-    candidate_state = deepcopy(state)
+    candidate_state = state[:]
 
     if action[0] == 'BOOM':
         boom(candidate_state, action[1])
