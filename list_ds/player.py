@@ -22,15 +22,13 @@ class ExamplePlayer:
         # Choose appropriate depth based on the number of pieces left on the board
         num_pieces = sum([abs(x) for x in self.state])
         
-        if num_pieces > 15:
-            minimax_agent = MinimaxABAgent(2, self.colour)
-        elif 13 <= num_pieces <= 15:
+        if num_pieces > 16:
             minimax_agent = MinimaxABAgent(3, self.colour)
-        elif 7 <= num_pieces <= 12:
+        elif 12 <= num_pieces <= 16:
             minimax_agent = MinimaxABAgent(4, self.colour)
-        elif 4 <= num_pieces <= 6:
+        elif 6 <= num_pieces <= 11:
             minimax_agent = MinimaxABAgent(5, self.colour)
-        elif 1 <= num_pieces <= 3:
+        elif 3 <= num_pieces <= 5:
             minimax_agent = MinimaxABAgent(6, self.colour)
         else:
             minimax_agent = MinimaxABAgent(1, self.colour)

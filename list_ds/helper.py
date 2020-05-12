@@ -112,20 +112,14 @@ def distance(state):
             white.append(convert_index(idx))
 
     minimum_dis = float("inf")
-    total_dis = 0
-    total = 0
 
     for b in black:
         for w in white:
             dis = euclidean(b, w)
-            total_dis += dis
-            total += 1
             if dis < minimum_dis:
                 minimum_dis = dis
     
-    avg_distance = total_dis / total
-
-    return minimum_dis, avg_distance
+    return minimum_dis
 
 
 def attack_range(state, colour):
@@ -141,10 +135,7 @@ def attack_range(state, colour):
         curr_range = 0
         for affected_token in affected:
             n = state[convert_pos(affected_token)]
-            if n*colour > 0:
-                # curr_range -= abs(n)
-                pass
-            elif n*colour < 0:
+            if n*colour < 0:
                 curr_range += abs(n)
         curr_range -= val
         if curr_range > max_range:
@@ -157,21 +148,37 @@ def stack_points(state, colour):
     return sum([2**abs(x) for x in state if x*colour>0])
 
 
+# def feature_set(state, colour):
+
+#     enemy_hp = sum([abs(x) for x in state if x*colour<0])
+
+#     num_diff = sum(state) * colour
+
+#     num_systems = compute_system(state, colour)
+    
+#     minimum_dis, avg_dis = distance(state)
+
+#     # attack_max_range = attack_range(state, colour)
+#     attack_max_range = 0
+
+#     stack = stack_points(state, colour)
+
+#     return [enemy_hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
+
 def feature_set(state, colour):
 
     enemy_hp = sum([abs(x) for x in state if x*colour<0])
 
     num_diff = sum(state) * colour
 
-    num_systems = compute_system(state, colour)
-    
-    minimum_dis, avg_dis = distance(state)
+    minimum_dis = distance(state)
 
-    attack_max_range = attack_range(state, colour)
+    num_systems = 0
 
-    stack = stack_points(state, colour) if num_diff < 0 else 0 # stack if in disadvantage
+    attack_max_range = 0
 
-    return [enemy_hp, num_diff, num_systems, minimum_dis, avg_dis, attack_max_range, stack]
+
+    return [enemy_hp, num_diff, minimum_dis]
 
 
 # Evaluate function to calculate current board state for a player
@@ -193,7 +200,8 @@ def evaluate(state, colour):
     features = np.array(feature_set(state, colour))
 
     # [enemy_hp, num_diff, num_systems, minimum_dis, average_dis, attack_max_range, stack]
-    coeff = [-1, 3, 0, -0.1, 0, 2, 0.2]
+    # coeff = [-10, 200, 20, -0.1, 0, 20, 0]
+    coeff = [-800, 2000, -0.01]
 
     _coeff = np.array(coeff)
 
