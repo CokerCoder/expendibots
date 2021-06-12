@@ -1,10 +1,19 @@
 import React from "react";
+import Button from "@material-ui/core/Button";
 
 export default function ExpendibotsBoard(props) {
   function onClick(id) {
-    // check cell
     console.log(id);
-    console.log(props.ctx);
+    console.log(props);
+
+    if (props.G.selected == null) {
+      props.moves.selectToken(id);
+    } else if (props.G.action == null) {
+      // props.chooseAction
+    } else {
+      props.moves.moveTo(id);
+    }
+
     // props.moves.clickCell(id);
   }
 
@@ -44,6 +53,22 @@ export default function ExpendibotsBoard(props) {
         <table id="board">
           <tbody>{tbody}</tbody>
         </table>
+      </div>
+      <div>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={props.G.selected == null}
+        >
+          Move
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          disabled={props.G.selected == null}
+        >
+          Explode
+        </Button>
       </div>
     </div>
   );
